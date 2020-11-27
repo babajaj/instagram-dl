@@ -19,7 +19,7 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-
+profiles2 = [profiles[0]]
 
 
 # #run this to get the profiles:
@@ -27,6 +27,14 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 #     for listitem in profiles:
 #         filehandle.write('%s\n' % listitem)
 
+def get_file_names(path):
+    txt_files = []
+    arr = os.listdir(path)
+    for item in arr:
+        if item.endswith('.txt'):
+            file_name = item.split('.')[0]
+            txt_files.append(file_name)
+    return txt_files
 
 def load_data(profiles):
     folder_index = 0
@@ -38,21 +46,22 @@ def load_data(profiles):
     names = []
     for name in profiles:
         folder = "data/" + name
-        arr = os.listdir(folder)
-        for file in arr:
-            if get_image:
-                image = np.asarray(Image.open(folder + '/' + file))
-            else:
-                if file.endswith(".txt"):
-                    with open(file, 'r') as f:
-                        caption = f.read().replace('\n', '')
-            folder_index += 1
+        file_names = get_file_names(folder)
+        for file in file_names:
+            try:
+                image = np.asarray(Image.open(folder + '/' + file + '.jpg'))
+            except Exception:
+                image = np.asarray(Image.open(folder + '/' + file + '_1.jpg'))
+            f = open(folder + '/' + file + '.txt', encoding="utf8")
+            caption = f.read().replace("\n", " ")
+            f.close
             images.append(image)
             captions.append(caption)
-            names.append(name)
-    return names, images, captions 
+        names.append(name)
+    return names, np.array(images), captions 
 
     
 
+names, images, captions = load_data(profiles2)
 
-    
+print(len(images), len(captions))
