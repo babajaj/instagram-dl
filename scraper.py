@@ -41,7 +41,7 @@ def load_data(profiles):
         arr = os.listdir(folder)
         for file in arr:
             if get_image:
-                image = Image.open(folder + '/' + file)
+                image = np.asarray(Image.open(folder + '/' + file))
             else:
                 if file.endswith(".txt"):
                     with open(file, 'r') as f:
