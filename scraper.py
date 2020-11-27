@@ -38,9 +38,6 @@ def get_file_names(path):
 
 def load_data(profiles):
     folder_index = 0
-    get_image = True
-    image = None
-    caption = None
     images = []
     captions = []
     names = []
