@@ -19,7 +19,7 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-profiles2 = profiles[0:50]
+profiles2 = profiles[0:57]
 
 
 # #run this to get the profiles:
@@ -27,7 +27,7 @@ profiles2 = profiles[0:50]
 #     for listitem in profiles:
 #         filehandle.write('%s\n' % listitem)
 
-img_size = (256, 256)
+img_size = (224, 224)
 
 def get_file_names(path):
     txt_files = []
@@ -61,7 +61,7 @@ def load_data(profiles):
     return names, images, captions 
 
 
-names, images, captions = load_data(profiles[0:3])
+names, images, captions = load_data(profiles[0:57])
 
 print(len(images), len(captions))
 
@@ -74,6 +74,7 @@ def jsonify(names, images, captions):
 
 
 jsonify(names, images, captions)
+print("done with making a json")
 
 #SCRAPER:
 # read first n characters (150)
