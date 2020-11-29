@@ -19,7 +19,7 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-profiles2 = profiles[0:57]
+profiles2 = profiles[0:3]
 
 
 # #run this to get the profiles:
@@ -53,20 +53,16 @@ def load_data(profiles):
                 image = Image.open(folder + '/' + file + '_1.jpg')
             
             image = np.asarray(image.resize(img_size))
-     
             f = open(folder + '/' + file + '.txt', encoding="utf8")
             caption = f.read().replace("\n", " ")
             f.close
             images.append(image)
             captions.append(caption)
         names.append(name)
-    return names, images, captions 
+    return names, np.array(images), captions 
 
 
 names, images, captions = load_data(profiles2)
-npimages = np.zeros([len(images), 224, 224, 3])
-for i in range(len(images)):
-    npimages[i] = images[i]
 
 print(len(images), len(captions))
 
