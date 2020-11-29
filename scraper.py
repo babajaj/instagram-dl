@@ -19,7 +19,7 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-profiles2 = profiles[0:57]
+profiles2 = profiles[0:3]
 
 
 # #run this to get the profiles:
@@ -61,7 +61,7 @@ def load_data(profiles):
     return names, np.array(images), captions 
 
 
-names, images, captions = load_data(profiles[0:57])
+names, images, captions = load_data(profiles2)
 
 print(len(images), len(captions))
 
