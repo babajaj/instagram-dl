@@ -6,12 +6,12 @@ import json
 #   list of profiles of length 103. We tried to somewhat balance male/female
 #   accounts and get some but not too many types of accounts .
 profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardashian", "beyonce", "justinbieber", "natgeo", "kendalljenner",
-            "taylorswift", "jlo", "nickiminaj", "khloekardashian", "nike", "mileycyrus", "katyperry", "kourtneykardashians", "kevinhart4real",
+            "taylorswift", "jlo", "nickiminaj", "khloekardashian", "nike", "mileycyrus", "katyperry", "kourtneykardash", "kevinhart4real",
             "ddlovato", "theellenshow", "badgalriri", "virat.kohli", "zendaya", "iamcardib", "kingjames", "chrisbrownofficial", "champagnepapi", "billieeilish",
             "shakira", "victoriassecret", "vindiesel", "championsleague", "davidbeckham", "nasa", "gigihadid", "justintimberlake", "emmawatson",
-            "priyankachopra", "shawnmendes", "shraddhakapoor", "maluma", "snoopdogg", "dualipa", "9gag", "nba", "camila_cabello", "willsmith",
-            "aliaabhatt", "anitta", "marvel", "nehakakkar", "hudabeauty", "robertdowneyjr", "leonardodicaprio", "gal_gadot", "katrinakaif", "chrishemsworth",
-            "ladygaga", "JBalvin", "zacefron", "michelleobama", "caradelevingne", "garethbale11", "nikefootball", "lelepons", "premierleague", "gucci",
+            "priyankachopra", "shawnmendes", "shraddhakapoor", "snoopdogg", "dualipa", "9gag", "nba", "camila_cabello", "willsmith",
+            "aliaabhatt", "marvel", "nehakakkar", "hudabeauty", "robertdowneyjr", "leonardodicaprio", "gal_gadot", "katrinakaif", "chrishemsworth",
+            "ladygaga", "zacefron", "michelleobama", "caradelevingne", "garethbale11", "nikefootball", "lelepons", "premierleague", "gucci",
             "natgeotravel", "dishapatani", "adele", "brunamarquezine", "milliebobbybrown", "vanessahudgens", "vancityreynolds", "tomholland2013", "danbilzerian",
             "jenniferaniston", "shaymitchell", "blakelively", "amandacerny", "camerondallas", "lizakoshy", "jamescharles", "hillaryduff", "jakepaul", 
             "jenselter", "nashgrier", "lilly", "davidmichigan", "joerogan", "gordongram", "simeonpanda", "rickeythompson", "doctor.mike", "justinptrudeau",
@@ -19,7 +19,7 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-profiles2 = [profiles[0]]
+profiles2 = profiles[0:50]
 
 
 # #run this to get the profiles:
