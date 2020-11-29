@@ -51,30 +51,31 @@ def load_data(profiles):
                 image = Image.open(folder + '/' + file + '.jpg')
             except Exception:
                 image = Image.open(folder + '/' + file + '_1.jpg')
-            image = np.asarray(image.resize(img_size)).tolist()
+            image = np.asarray(image.resize(img_size))
             f = open(folder + '/' + file + '.txt', encoding="utf8")
             caption = f.read().replace("\n", " ")
             f.close
             images.append(image)
             captions.append(caption)
         names.append(name)
-    return names, images, captions 
+    return names, np.array(images), captions 
 
 
 names, images, captions = load_data(profiles[0:57])
 
 print(len(images), len(captions))
 
-
-def jsonify(names, images, captions):
-    with open("data/images.json", "w") as imgs:
-        json.dump(images, imgs)
+def pickle(names, images, captions):
+    with open("data/images.npy", "wb") as imgs:
+        np.save(imgs, images, allow_pickle=True)
+    print("imgs done")
     with open("data/captions.json", "w") as caps:
         json.dump(captions, caps)
+    print('captions done')
 
+pickle(names, images, captions)
 
-jsonify(names, images, captions)
-print("done with making a json")
+print("done with making a pickle")
 
 #SCRAPER:
 # read first n characters (150)
