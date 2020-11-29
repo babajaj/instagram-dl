@@ -53,11 +53,14 @@ def load_data(profiles):
                 image = Image.open(folder + '/' + file + '_1.jpg')
             
             image = np.asarray(image.resize(img_size))
+            
+
             f = open(folder + '/' + file + '.txt', encoding="utf8")
             caption = f.read().replace("\n", " ")
             f.close
-            images.append(image)
-            captions.append(caption)
+            if (len(image.shape) != 2):
+                images.append(image)
+                captions.append(caption)
         names.append(name)
     return names, np.array(images), captions 
 
