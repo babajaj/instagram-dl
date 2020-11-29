@@ -19,13 +19,12 @@ profiles = ["arianagrande", "therock", "kyliejenner", "selenagomez", "kimkardash
 
 
 
-profiles2 = [profiles[0]]
-
-
 # #run this to get the profiles:
 # with open('profiles.txt', 'w') as filehandle:
 #     for listitem in profiles:
 #         filehandle.write('%s\n' % listitem)
+
+img_size = (256, 256)
 
 def get_file_names(path):
     txt_files = []
@@ -46,19 +45,39 @@ def load_data(profiles):
         file_names = get_file_names(folder)
         for file in file_names:
             try:
-                image = np.asarray(Image.open(folder + '/' + file + '.jpg'))
+                image = Image.open(folder + '/' + file + '.jpg')
             except Exception:
-                image = np.asarray(Image.open(folder + '/' + file + '_1.jpg'))
+                image = Image.open(folder + '/' + file + '_1.jpg')
+            image = np.asarray(image.resize(img_size)).tolist()
             f = open(folder + '/' + file + '.txt', encoding="utf8")
             caption = f.read().replace("\n", " ")
             f.close
             images.append(image)
             captions.append(caption)
         names.append(name)
-    return names, np.array(images), captions 
+    return names, images, captions 
 
-    
 
-names, images, captions = load_data(profiles2)
+names, images, captions = load_data(profiles[0:3])
 
 print(len(images), len(captions))
+
+
+def jsonify(names, images, captions):
+    with open("data/images.json", "w") as imgs:
+        json.dump(images, imgs)
+    with open("data/captions.json", "w") as caps:
+        json.dump(captions, caps)
+
+
+jsonify(names, images, captions)
+
+#SCRAPER:
+# read first n characters (150)
+# resize images
+
+
+#PARSER:
+# tokenize captions by character (emojis, hashtags included)
+# build vocab out of tokenizing
+
