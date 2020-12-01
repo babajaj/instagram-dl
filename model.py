@@ -1,14 +1,36 @@
 from preprocess import tokenize, pre_image
 from unscraper import load_data
+from tensorflow.keras.layers import (LSTM, Embedding, Input, Dense, Dropout, Add)
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+
 
 class Model(tf.keras.Model):
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, caption_length):
         """
         The Model class predicts the next character in a sequence.
 
         :param vocab_size: The number of unique characters in the data
         """
+        
+        self.batch_size = 100
+        self.vocab_size = vocab_size
+        self.caption_length = caption_length
+        
+        ##caption model
+        input_caps = Input([self.batch_size, self.caption_length])
+        dropout_caps = Dropout(0.5)
+        ############ TODO: LSTM #################
 
+        ##images model
+        input_imgs = Input([self.batch_size, 4096])
+        dropout_imgs = Dropout(0.5)
+        dense_imgs = Dense(256)
+
+        ##merge
+        add = Add()
+        dense = Dense(256, activation='relu')
+        predict = Dense(self.vocab_size)
         
 
 
