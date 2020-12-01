@@ -20,6 +20,7 @@ def tokenize(captions):
     for line in captions:
         line = line.lower()
         for c in line:
+            print(c)
             if c == "\\":
                 string = "\\"
                 counter += 1
