@@ -23,15 +23,16 @@ def tokenize(captions):
             if c == "\\":
                 string = "\\"
                 counter += 1
-            elif counter > 0:
+            elif counter == 5:
                 string += c
-                counter += 1
-            elif counter == 6 and (string not in vocab_dict) :
                 if string not in vocab_dict:
                     vocab_dict[string] = x
                     x = x + 1
                 counter = 0
                 string = ""
+            elif counter > 0:
+                string += c
+                counter += 1
             elif (c not in vocab_dict) and counter == 0:
                 vocab_dict[c] = x
                 x = x + 1
