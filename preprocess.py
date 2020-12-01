@@ -1,4 +1,10 @@
-
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.models import Model
+from tensorflow.keras.preprocessing.image import img_to_array, load_img
+from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
+from unscraper import load_data
+import numpy as np
 
 def tokenize(captions):
     """
@@ -36,3 +42,21 @@ def tokenize(captions):
 captions = [
     "rum punch + the beach ", "hello fall \ud83d\udc9a "]
 print(tokenize(captions))
+
+
+
+def pre_image(images):
+    features = []
+    # Model to pre-process images
+    cnn_model = VGG16()
+    # re-structure the model
+    cnn_model.layers.pop()
+    cnn_model = Model(inputs=cnn_model.inputs, outputs=cnn_model.layers[-2].output)
+    x = preprocess_input(images)
+    features = cnn_model.predict(x)
+    with open("data/features.npy", "wb") as feats:
+        np.save(feats, features, allow_pickle=True)
+    return features
+
+
+

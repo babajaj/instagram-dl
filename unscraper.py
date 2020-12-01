@@ -12,4 +12,4 @@ def load_data(caption_file, images_file):
 
 data = load_data("data/captions.json", "data/images.npy")
 
-print(data[1])
+print(data[1].shape)
