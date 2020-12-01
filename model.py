@@ -30,7 +30,7 @@ class Model(tf.keras.Model):
         ##merge
         add = Add()
         dense = Dense(256, activation='relu')
-        predict = Dense(self.vocab_size)
+        predict = Dense(self.vocab_size, activation='softmax')
         
 
 
