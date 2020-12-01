@@ -18,6 +18,7 @@ def tokenize(captions):
     counter = 0
     string = ""
     for line in captions:
+        line = line.lower()
         for c in line:
             if c == "\\":
                 string = "\\"
@@ -26,11 +27,12 @@ def tokenize(captions):
                 string += c
                 counter += 1
             elif counter == 6 and (string not in vocab_dict) :
+                if string not in vocab_dict:
+                    vocab_dict[string] = x
+                    x = x + 1
                 counter = 0
-                vocab_dict[string] = x
                 string = ""
-                x = x + 1
-            elif c not in vocab_dict:
+            elif (c not in vocab_dict) and counter == 0:
                 vocab_dict[c] = x
                 x = x + 1
             training_data.append(vocab_dict[c])
@@ -38,10 +40,9 @@ def tokenize(captions):
     return training_data, vocab_dict
     print(len(training_data))
 
-
-captions = [
-    "rum punch + the beach ", "hello fall \ud83d\udc9a "]
-print(tokenize(captions))
+data = load_data("data/captions.json","data/images.npy")
+captions = tokenize(data[0])
+print(captions[1])
 
 
 
