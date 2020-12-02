@@ -38,7 +38,7 @@ def get_file_names(path):
             txt_files.append(file_name)
     return txt_files
 
-def load_data(profiles):
+def build_data(profiles):
     folder_index = 0
     images = []
     captions = []
@@ -65,10 +65,6 @@ def load_data(profiles):
     return names, np.array(images), captions 
 
 
-names, images, captions = load_data(profiles2)
-
-print(len(images), len(captions))
-
 def pickle(names, images, captions):
     with open("data/images.npy", "wb") as imgs:
         np.save(imgs, images, allow_pickle=True)
@@ -77,6 +73,8 @@ def pickle(names, images, captions):
         json.dump(captions, caps)
     print('captions done')
 
+
+names, images, captions = build_data(profiles2)
 pickle(names, images, captions)
 
 print("done with making a pickle")
