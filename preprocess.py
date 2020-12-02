@@ -19,14 +19,16 @@ def tokenize(captions):
     string = ""
     for line in captions:
         line = line.lower()
+        padding = 0
         for c in line:
             if (c not in vocab_dict):
                 vocab_dict[c] = x
                 x = x + 1
+            padding += 1
             training_data.append(vocab_dict[c])
-        training_data.append(0)
-    print(len(training_data))
- 
+        while padding < 150:
+            training_data.append(0)
+            padding += 1
     return training_data, vocab_dict
     
 

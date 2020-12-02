@@ -41,7 +41,7 @@ class Model(tf.keras.Model):
 
 
 
-    def call(self, images, captions):
+    def call(self, images, captions, initial_state):
         """
         :param inputs: character ids of shape (batch_size, window_size)
         :return: the batch element probabilities as a tensor, a final_state (Note 1: If you use an LSTM, the final_state will be the last two RNN outputs, 
@@ -51,18 +51,19 @@ class Model(tf.keras.Model):
         ##caps
         embeddings = self.embedding(captions)
         encode = self.dropout_caps(encode)
-        encode = self.encoder(embeddings)
+        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
+        return whole_seq_output, (final_memory_state,final_carry_state)
 
         ##images
         images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
 
         ##merge
-        combined = self.add(encode, images)
+        combined = self.add(whole_seq_output, images)
         combined = self.dense(combined)
         output = self.predict(combined)
         
-        return output
+        return output, (final_memory_state,final_carry_state)
 
     def loss(self, probs, labels):
         """
@@ -126,7 +127,25 @@ def generate_caption(word1, length, vocab, model, sample_n=10):
     it is because we need to generate captions to see our results
     """
 
- 
+    reverse_vocab = {idx: word for word, idx in vocab.items()}
+    previous_state = None
+
+    first_string = word1
+    first_word_index = vocab[word1]
+    next_input = [[first_word_index]]
+    text = [first_string]
+
+    for i in range(length):
+        logits, previous_state = model.call(next_input, previous_state)
+        logits = np.array(logits[0,0,:])
+        top_n = np.argsort(logits)[-sample_n:]
+        n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
+        out_index = np.random.choice(top_n,p=n_logits)
+
+        text.append(reverse_vocab[out_index])
+        next_input = [[out_index]]
+
+    print(" ".join(text))
 
 
 def main():
