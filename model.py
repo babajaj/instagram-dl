@@ -17,7 +17,7 @@ class Model(tf.keras.Model):
 
         :param vocab_size: The number of unique characters in the data
         """
-        self.caption_length = 100
+        self.caption_length = 150
         self.batch_size = 100
         self.vocab_size = vocab_size
         self.embedding_size = 256
@@ -72,6 +72,7 @@ class Model(tf.keras.Model):
         :param labels: matrix of shape (batch_size, window_size) containing the labels
         :return: the loss of the model as a tensor of size 1
         """
+        return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs[0]))
 
 def train(model, images, captions):
     """
@@ -83,23 +84,23 @@ def train(model, images, captions):
     :return: None
     """
    
-    remainderInputs = len(images) % model.window_size
+    remainderInputs = len(images) % model.caption_length
     currInputs = images[:-remainderInputs]
     
-    remainderLabels = len(captions) % model.window_size
+    remainderLabels = len(captions) % model.caption_length
     currLabels = captions[:-remainderLabels]
     
-    currInputs = tf.reshape(currInputs,(-1,model.window_size))
-    currLabels = tf.reshape(currLabels,(-1,model.window_size))
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    currInputs = tf.reshape(currInputs,(-1,model.caption_length))
+    currLabels = tf.reshape(currLabels,(-1,model.caption_length))
+
     for i in range(0, len(currInputs)//model.batch_size): 
         inputs = currInputs[i*model.batch_size:(i+1)* model.batch_size]
         labels = currLabels[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
-            predictions = model.call(inputs,None) 
+            predictions = model.call(inputs, labels, None) 
             loss = model.loss(predictions, labels)
         gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return None
     
 
