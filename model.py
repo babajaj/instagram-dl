@@ -52,7 +52,6 @@ class Model(tf.keras.Model):
         embeddings = self.embedding(captions)
         encode = self.dropout_caps(encode)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
-        return whole_seq_output, (final_memory_state,final_carry_state)
 
         ##images
         images = self.dropout_imgs(images)
@@ -128,7 +127,7 @@ def generate_caption(word1, length, vocab, model, sample_n=10):
     it is because we need to generate captions to see our results
     """
 
-    reverse_vocab = {idx: word for word, idx in vocab.items()}
+    reverse_vocab = {idx: char for char, idx in vocab.items()}
     previous_state = None
 
     first_string = word1
