@@ -20,27 +20,15 @@ def tokenize(captions):
     for line in captions:
         line = line.lower()
         for c in line:
-            print(c)
-            if c == "\\":
-                string = "\\"
-                counter += 1
-            elif counter == 5:
-                string += c
-                if string not in vocab_dict:
-                    vocab_dict[string] = x
-                    x = x + 1
-                counter = 0
-                string = ""
-            elif counter > 0:
-                string += c
-                counter += 1
-            elif (c not in vocab_dict) and counter == 0:
+            if (c not in vocab_dict):
                 vocab_dict[c] = x
                 x = x + 1
             training_data.append(vocab_dict[c])
         training_data.append(0)
-    return training_data, vocab_dict
     print(len(training_data))
+ 
+    return training_data, vocab_dict
+    
 
 data = load_data("data/captions.json","data/images.npy")
 captions = tokenize(data[0])
