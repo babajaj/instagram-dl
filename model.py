@@ -83,10 +83,10 @@ def train(model, images, captions):
     :return: None
     """
    
-    remainderInputs = len(images) % model.window_size
+    remainderInputs = len(images) % model.caption_length
     currInputs = images[:-remainderInputs]
     
-    remainderLabels = len(captions) % model.window_size
+    remainderLabels = len(captions) % model.caption_length
     currLabels = captions[:-remainderLabels]
     
     currInputs = tf.reshape(currInputs,(-1,model.caption_length))
@@ -96,7 +96,7 @@ def train(model, images, captions):
         inputs = currInputs[i*model.batch_size:(i+1)* model.batch_size]
         labels = currLabels[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
-            predictions = model.call(inputs,None) 
+            predictions = model.call(inputs, labels, None) 
             loss = model.loss(predictions, labels)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
