@@ -26,17 +26,20 @@ def tokenize(captions):
                 x = x + 1
             padding += 1
             training_data.append(vocab_dict[c])
+            if padding == 150:
+                break
         while padding < 150:
             training_data.append(0)
             padding += 1
     return training_data, vocab_dict
     
 
-data = load_data("data/captions.json","data/images.npy")
-captions = tokenize(data[0])
-print(captions[1])
-
-
+# data = load_data("data/captions.json","data/images.npy")
+# captions = tokenize(data[0])
+# print(captions[1])
+cap = ["cardigan \u201ccabin in candlelight\u201d version is out now \ud83d\udd6f ", "Man down"]
+out = tokenize(cap)
+print(out[0])
 
 def pre_image(images):
     features = []
