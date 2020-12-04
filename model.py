@@ -132,36 +132,35 @@ def accuracy_function(self, prbs, labels, mask):
     accuracy = tf.reduce_mean(tf.boolean_mask(tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32),mask))
     return accuracy
 
-def generate_caption(word1, length, vocab, model, sample_n=10):
+def generate_caption(vocab, image, model, sample_n=10):
     """
     Takes a model, vocab, selects from the most likely next word from the model's distribution
 
     :param model: trained RNN model
     :param vocab: dictionary, word to id mapping
     :return: None
-    IDK IF THIS ONE IS NEEDED
     it is because we need to generate captions to see our results
     """
+
+
 
     reverse_vocab = {idx: char for char, idx in vocab.items()}
     previous_state = None
 
-    first_string = word1
-    first_word_index = vocab[word1]
-    next_input = [[first_word_index]]
-    text = [first_string]
-
-    for i in range(length):
-        logits, previous_state = model.call(next_input, previous_state)
-        logits = np.array(logits[0,0,:])
-        top_n = np.argsort(logits)[-sample_n:]
-        n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
-        out_index = np.random.choice(top_n,p=n_logits)
-
-        text.append(reverse_vocab[out_index])
+    first_char = -1
+    next_input = [[first_char]]
+    text = ""
+    out_index = 0
+    while out_index != -2:
+        logits, previous_state = model.call(image, next_input, previous_state)
+        # logits = np.array(logits[0,0,:])
+        # top_n = np.argsort(logits)[-sample_n:]
+        # n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
+        out_index = np.argmax(logits)
+        if out_index != -2:
+            text.append(reverse_vocab[out_index])
         next_input = [[out_index]]
-
-    print(" ".join(text))
+    print(text)
 
 
 def vizualize_loss(loss_arr):
