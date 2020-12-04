@@ -10,6 +10,3 @@ def load_data(caption_file, images_file):
     print('loaded images')
     return captions, images
 
-data = load_data("data/captions.json", "data/features.npy")
-
-print(data[1].shape)

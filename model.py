@@ -7,6 +7,7 @@ from tensorflow.keras.layers import (LSTM, Embedding, Input, Dense, Dropout, Add
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from nltk.translate.bleu_score import sentence_bleu
+import matplotlib.pyplot as plt
 
 
 
@@ -17,7 +18,7 @@ class Model(tf.keras.Model):
 
         :param vocab_size: The number of unique characters in the data
         """
-        self.caption_length = 150
+        self.caption_length = 152
         self.batch_size = 100
         self.vocab_size = vocab_size
         self.embedding_size = 256
@@ -85,26 +86,25 @@ def train(model, images, captions):
     :return: None
     """
    
-   
-    remainderInputs = len(images) % model.batch_size
     images = images[:-(len(images) % model.batch_size)]
 
     captions = np.reshape(captions, (-1, model.caption_length))
-    cptions = captions[:-(len(images) % model.batch_size)]
+    captions = captions[:-(len(images) % model.batch_size)]
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
-
+    loss_graph = []
     for i in range(0, len(images)//model.batch_size): 
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
-        caps_label = caption_input[i*model.batch_size:(i+1)* model.batch_size]
+        caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
             predictions = model.call(imgs, caps_input, None)
             padding_mask = np.where(caps_label == 0, 0, 1)
             loss = model.loss_function(predictions, caps_label, padding_mask)
+            loss_graph.append(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    return None
+    return loss_graph
     
 
 
@@ -152,12 +152,20 @@ def generate_caption(word1, length, vocab, model, sample_n=10):
     print(" ".join(text))
 
 
+def vizualize_loss(loss_arr):
+     plt.plot(np.arange(len(loss_arr)), loss_arr)
+     plt.ylabel('loss')
+     plt.xlabel('batch #')
+     plt.show()
+
+
 def main():
-    data = load_data("captions.json","images.npy")
+    data = load_data("captions.json","features.npy")
     training_captions, vocab_dict = tokenize(data[0])
     images = data[1]
     model = Model(len(vocab_dict))
-    train(model, images, training_captions)
+    loss_graph = train(model, images, training_captions)
+    vizualize_loss(loss_graph)
 
 
 
