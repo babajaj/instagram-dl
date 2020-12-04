@@ -100,7 +100,8 @@ def train(model, images, captions):
         caps_label = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
             predictions = model.call(imgs, caps_input, None)
-            loss = model.loss(predictions, caps_label)
+            padding_mask = np.where(caps_label == 0, 0, 1)
+            loss = model.loss_function(predictions, caps_label, padding_mask)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return None
