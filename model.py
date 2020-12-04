@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 class Model(tf.keras.Model):
     def __init__(self, vocab_size):
+        super(Model, self).__init__()
         """
         The Model class predicts the next character in a sequence.
 
@@ -50,8 +51,8 @@ class Model(tf.keras.Model):
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
         ##caps        
-        embeds = tf.nn.embedding_lookup(self.E, captions)
-        encode = self.dropout_caps(encode)
+        embeds = tf.nn.embedding_lookup(self.embedding, captions)
+        encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
 
         ##images
@@ -59,7 +60,7 @@ class Model(tf.keras.Model):
         images = self.dense_imgs(images)
 
         ##merge
-        combined = self.add(whole_seq_output, images)
+        combined = self.add([whole_seq_output, images])
         combined = self.dense(combined)
         output = self.predict(combined)
         
@@ -171,7 +172,7 @@ def vizualize_loss(loss_arr):
 
 
 def main():
-    data = load_data("captions.json","features.npy")
+    data = load_data("data/captions.json","data/features.npy")
     training_captions, vocab_dict = tokenize(data[0])
     images = data[1]
     model = Model(len(vocab_dict))
