@@ -25,8 +25,8 @@ class Model(tf.keras.Model):
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
 
         ##caption model
-        self.embedding = Embedding(self.vocab_size, self.embedding_size, mask_zero=True)
-        self.encoder = LSTM(self.embedding_size)
+        self.embedding = tf.Variable(tf.random.normal([self.vocab_size, self.embedding_size], stddev=.1))
+        self.encoder = LSTM(self.embedding_size, return_sequences=True, return_state=True)
         self.dropout_caps = Dropout(0.5)
         
         ##images model
@@ -48,8 +48,8 @@ class Model(tf.keras.Model):
         Note 2: We only need to use the initial state during generation)
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
-        ##caps
-        embeddings = self.embedding(captions)
+        ##caps        
+        embeds = tf.nn.embedding_lookup(self.E, captions)
         encode = self.dropout_caps(encode)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
 
