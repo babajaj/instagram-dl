@@ -85,21 +85,22 @@ def train(model, images, captions):
     :return: None
     """
    
-    remainderInputs = len(images) % model.caption_length
-    currInputs = images[:-remainderInputs]
-    
-    remainderLabels = len(captions) % model.caption_length
-    currLabels = captions[:-remainderLabels]
-    
-    currInputs = tf.reshape(currInputs,(-1,model.caption_length))
-    currLabels = tf.reshape(currLabels,(-1,model.caption_length))
+   
+    remainderInputs = len(images) % model.batch_size
+    images = images[:-(len(images) % model.batch_size)]
 
-    for i in range(0, len(currInputs)//model.batch_size): 
-        inputs = currInputs[i*model.batch_size:(i+1)* model.batch_size]
-        labels = currLabels[i*model.batch_size:(i+1)* model.batch_size]
+    captions = np.reshape(captions, (-1, model.caption_length))
+    cptions = captions[:-(len(images) % model.batch_size)]
+    caption_input = captions[:, :-1]
+    caption_label = captions[:, 1:]
+
+    for i in range(0, len(images)//model.batch_size): 
+        imgs = images[i*model.batch_size:(i+1)* model.batch_size]
+        caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
+        caps_label = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
-            predictions = model.call(inputs, labels, None) 
-            loss = model.loss(predictions, labels)
+            predictions = model.call(imgs, caps_input, None)
+            loss = model.loss(predictions, caps_label)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return None
