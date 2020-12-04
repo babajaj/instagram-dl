@@ -20,6 +20,7 @@ def tokenize(captions):
     for line in captions:
         line = line.lower()
         padding = 0
+        training_data.append(-1) #start token
         for c in line:
             if (c not in vocab_dict):
                 vocab_dict[c] = x
@@ -31,15 +32,17 @@ def tokenize(captions):
         while padding < 150:
             training_data.append(0)
             padding += 1
+        training_data.append(-2) #end token
     return training_data, vocab_dict
     
 
 # data = load_data("data/captions.json","data/images.npy")
 # captions = tokenize(data[0])
 # print(captions[1])
-cap = ["cardigan \u201ccabin in candlelight\u201d version is out now \ud83d\udd6f ", "Man down"]
+cap = ["folklore will have 16 songs on the standard edition, but the physical deluxe editions will include a bonus track called \u201cthe lakes.\u201d Because this is my 8th studio album, I made 8 deluxe CD editions and 8 deluxe vinyl editions that are available for one week\ud83d\ude04 Each deluxe edition has unique covers, photos, and artwork. Available exclusively at taylorswift.com "]
 out = tokenize(cap)
 print(out[0])
+print(len(out[0]))
 
 def pre_image(images):
     features = []

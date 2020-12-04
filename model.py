@@ -64,14 +64,16 @@ class Model(tf.keras.Model):
         
         return output, (final_memory_state,final_carry_state)
 
-    def loss(self, probs, labels):
+    def loss(self, probs, labels, mask):
         """
 
         :param logits: a matrix of shape (batch_size, window_size, vocab_size) as a tensor
         :param labels: matrix of shape (batch_size, window_size) containing the labels
         :return: the loss of the model as a tensor of size 1
         """
-        return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs[0]))
+        loss = tf.keras.losses.sparse_categorical_crossentropy(labels,probs[0])
+        loss = tf.reduce_sum(loss * mask)
+        return loss
 
 def train(model, images, captions):
     """
