@@ -17,7 +17,7 @@ class Model(tf.keras.Model):
 
         :param vocab_size: The number of unique characters in the data
         """
-        self.caption_length = 150
+        self.caption_length = 152
         self.batch_size = 100
         self.vocab_size = vocab_size
         self.embedding_size = 256
@@ -90,14 +90,14 @@ def train(model, images, captions):
     images = images[:-(len(images) % model.batch_size)]
 
     captions = np.reshape(captions, (-1, model.caption_length))
-    cptions = captions[:-(len(images) % model.batch_size)]
+    captions = captions[:-(len(images) % model.batch_size)]
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
 
     for i in range(0, len(images)//model.batch_size): 
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
-        caps_label = caption_input[i*model.batch_size:(i+1)* model.batch_size]
+        caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
             predictions = model.call(imgs, caps_input, None)
             padding_mask = np.where(caps_label == 0, 0, 1)
@@ -118,7 +118,19 @@ def test(model, test_inputs, test_labels):
     :returns: perplexity of the test set
     """
     
+def accuracy_function(self, prbs, labels, mask):
+    """
+    Computes the batch accuracy
+    
+    :param prbs:  float tensor, word prediction probabilities [batch_size x window_size x english_vocab_size]
+    :param labels:  integer tensor, word prediction labels [batch_size x window_size]
+    :param mask:  tensor that acts as a padding mask [batch_size x window_size]
+    :return: scalar tensor of accuracy of the batch between 0 and 1
+    """
 
+    decoded_symbols = tf.argmax(input=prbs, axis=2)
+    accuracy = tf.reduce_mean(tf.boolean_mask(tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32),mask))
+    return accuracy
 
 def generate_caption(word1, length, vocab, model, sample_n=10):
     """

@@ -29,17 +29,17 @@ def tokenize(captions):
             training_data.append(vocab_dict[c])
             if padding == 150:
                 break
+        training_data.append(-2) #end token    
         while padding < 150:
             training_data.append(0)
             padding += 1
-        training_data.append(-2) #end token
     return training_data, vocab_dict
     
 
 # data = load_data("data/captions.json","data/images.npy")
 # captions = tokenize(data[0])
 # print(captions[1])
-cap = ["folklore will have 16 songs on the standard edition, but the physical deluxe editions will include a bonus track called \u201cthe lakes.\u201d Because this is my 8th studio album, I made 8 deluxe CD editions and 8 deluxe vinyl editions that are available for one week\ud83d\ude04 Each deluxe edition has unique covers, photos, and artwork. Available exclusively at taylorswift.com "]
+cap = ["folklore will have 16 songs on the standard edition, but the physical deluxe editions will include a bonus track called \u201cthe lakes.\u201d Because this is my 8th studio album, I made 8 deluxe CD editions and 8 deluxe vinyl editions that are available for one week\ud83d\ude04 Each deluxe edition has unique covers, photos, and artwork. Available exclusively at taylorswift.com ","goodbye!"]
 out = tokenize(cap)
 print(out[0])
 print(len(out[0]))
