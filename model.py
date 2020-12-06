@@ -88,11 +88,11 @@ def train(model, images, captions):
     """
    
     images = images[:-(len(images) % model.batch_size)]
-
     captions = np.reshape(captions, (-1, model.caption_length))
-    captions = captions[:-(len(images) % model.batch_size)]
+    captions = captions[:-(len(captions) % model.batch_size)]
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
+    print(caption_input.shape)
     loss_graph = []
     for i in range(0, len(images)//model.batch_size): 
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
