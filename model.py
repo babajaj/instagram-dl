@@ -54,11 +54,11 @@ class Model(tf.keras.Model):
         ##caps
         captions = tf.convert_to_tensor(captions)
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-        encode = self.dropout_caps(embeds)
-        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
+        # encode = self.dropout_caps(embeds)
+        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(embeds, initial_state=initial_state)
         
         ##images
-        images = self.dropout_imgs(images)
+        # images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
       
         ##merge
@@ -139,7 +139,7 @@ def accuracy_function(self, prbs, labels, mask):
     accuracy = tf.reduce_mean(tf.boolean_mask(tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32),mask))
     return accuracy
 
-def generate_caption(vocab, image, model, sample_n=10):
+def generate_caption(vocab, image, caption, model,  sample_n=10):
     """
     Takes a model, vocab, selects from the most likely next word from the model's distribution
 
@@ -155,21 +155,20 @@ def generate_caption(vocab, image, model, sample_n=10):
     previous_state = None
 
     first_char = 1
-    next_input = [[first_char]]
+    next_input = [caption]
     text = ""
     out_index = 0
     i = 0
-    while out_index != 2 and i < 200:
+    while out_index != 2 and i < 50:
         i +=1 
         logits, previous_state = model.call(image, next_input, previous_state)
         # logits = np.array(logits[0,0,:])
         # top_n = np.argsort(logits)[-sample_n:]
         # n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
-        out_index = np.argmax(logits)
+        out_index = np.argmax(logits[0, logits.shape[1] - 1, :])
         if out_index != 2:
-            print("    " + str((reverse_vocab[out_index])))
             text += (reverse_vocab[out_index])
-        next_input = [[out_index]]
+        next_input[0].append(out_index)
     print(text)
 
 
@@ -186,9 +185,10 @@ def main():
     images = data[1]
     print(np.max(training_captions))
     model = Model(len(vocab_dict))
-    for i in range(50):
-        loss_graph = train(model, images, training_captions)
-        generate_caption(vocab_dict, np.array([images[0]]), model)
+    for i in range(1):
+        loss_graph = train(model, images[:500], training_captions[:500*152])
+        generate_caption(vocab_dict, np.array([images[0]]), training_captions[:10], model)
+        generate_caption(vocab_dict, np.array([images[0]]), training_captions[:20], model)
         vizualize_loss(loss_graph)
 
 
