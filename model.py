@@ -22,7 +22,7 @@ class Model(tf.keras.Model):
         self.caption_length = 152
         self.batch_size = 100
         self.vocab_size = vocab_size
-        self.embedding_size = 256
+        self.embedding_size =256
         self.learning_rate = 0.01
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
 
@@ -52,7 +52,6 @@ class Model(tf.keras.Model):
         """
         ##caps      
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-        print(embeds)
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
@@ -75,6 +74,7 @@ class Model(tf.keras.Model):
         """
         loss = tf.keras.losses.sparse_categorical_crossentropy(labels, probs)
         loss = tf.reduce_sum(loss * mask)
+        print(loss)
         return loss
 
 def train(model, images, captions):
@@ -179,7 +179,7 @@ def main():
     images = data[1]
     model = Model(len(vocab_dict))
     loss_graph = train(model, images, training_captions)
-    # vizualize_loss(loss_graph)
+    vizualize_loss(loss_graph)
 
 
 
