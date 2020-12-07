@@ -50,9 +50,10 @@ class Model(tf.keras.Model):
         Note 2: We only need to use the initial state during generation)
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
-        ##caps       
+        ##caps
+        print(captions)
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-       
+
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
