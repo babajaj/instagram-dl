@@ -52,12 +52,8 @@ class Model(tf.keras.Model):
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
         ##caps
-        # if not self.printed:
-        #     print(captions.shape)
-
         captions = tf.convert_to_tensor(captions)
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-        print(embeds)
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
@@ -100,8 +96,8 @@ def train(model, images, captions):
     loss_graph = []
 
     
-    for i in range(0, len(images)//model.batch_size - 1): 
-    
+    for i in range(0, len(images)//model.batch_size-1): 
+        print(i)
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
@@ -155,18 +151,21 @@ def generate_caption(vocab, image, model, sample_n=10):
     reverse_vocab = {idx: char for char, idx in vocab.items()}
     previous_state = None
 
-    first_char = -1
+    first_char = 1
     next_input = [[first_char]]
     text = ""
     out_index = 0
-    while out_index != -2:
+    i = 0
+    while out_index != 2 and i < 200:
+        i +=1 
         logits, previous_state = model.call(image, next_input, previous_state)
         # logits = np.array(logits[0,0,:])
         # top_n = np.argsort(logits)[-sample_n:]
         # n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
         out_index = np.argmax(logits)
-        if out_index != -2:
-            text.append(reverse_vocab[out_index])
+        if out_index != 2:
+            print("    " + str((reverse_vocab[out_index])))
+            text += (reverse_vocab[out_index])
         next_input = [[out_index]]
     print(text)
 
@@ -184,7 +183,9 @@ def main():
     images = data[1]
     model = Model(len(vocab_dict))
     loss_graph = train(model, images, training_captions)
-    # vizualize_loss(loss_graph)
+    generate_caption(vocab_dict, np.array([images[0]]), model)
+    vizualize_loss(loss_graph)
+
 
 
 

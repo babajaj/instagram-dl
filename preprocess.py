@@ -12,15 +12,14 @@ def tokenize(captions):
     :return: Tuple of train (1-d list or array with each character from captions in id form), vocabulary (Dict containg word->index mapping)
     """
     vocab_dict = dict()
-    x = 1
-    #stop word is 0
+    x = 3
     training_data = []
     counter = 0
     string = ""
     for line in captions:
         line = line.lower()
         padding = 0
-        training_data.append(-1) #start token
+        training_data.append(1) #start token
         for c in line:
             if (c not in vocab_dict):
                 vocab_dict[c] = x
@@ -29,7 +28,7 @@ def tokenize(captions):
             training_data.append(vocab_dict[c])
             if padding == 150:
                 break
-        training_data.append(-2) #end token    
+        training_data.append(2) #end token    
         while padding < 150:
             training_data.append(0)
             padding += 1
