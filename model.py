@@ -39,6 +39,7 @@ class Model(tf.keras.Model):
         self.add = Add()
         self.dense = Dense(self.embedding_size, activation='relu')
         self.predict = Dense(self.vocab_size, activation='softmax')
+        self.printed = False
         
 
 
@@ -51,9 +52,12 @@ class Model(tf.keras.Model):
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
         ##caps
-        print(captions)
-        embeds = tf.nn.embedding_lookup(self.embedding, captions)
+        # if not self.printed:
+        #     print(captions.shape)
 
+        captions = tf.convert_to_tensor(captions)
+        embeds = tf.nn.embedding_lookup(self.embedding, captions)
+        print(embeds)
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
