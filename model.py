@@ -51,9 +51,8 @@ class Model(tf.keras.Model):
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
         ##caps      
-        print(captions) 
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-        print("here")
+        print(embeds)
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
@@ -96,7 +95,7 @@ def train(model, images, captions):
     loss_graph = []
 
     
-    for i in range(0, len(images)//model.batch_size - 1): 
+    for i in range(0, len(images)//model.batch_size-1): 
     
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
