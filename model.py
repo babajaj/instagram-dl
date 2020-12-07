@@ -50,11 +50,11 @@ class Model(tf.keras.Model):
         Note 2: We only need to use the initial state during generation)
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
-        ##caps        
+        ##caps       
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
+       
         encode = self.dropout_caps(embeds)
-        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
-
+        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         ##images
         images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
@@ -73,7 +73,7 @@ class Model(tf.keras.Model):
         :param labels: matrix of shape (batch_size, window_size) containing the labels
         :return: the loss of the model as a tensor of size 1
         """
-        loss = tf.keras.losses.sparse_categorical_crossentropy(labels,probs[0])
+        loss = tf.keras.losses.sparse_categorical_crossentropy(labels, probs)
         loss = tf.reduce_sum(loss * mask)
         return loss
 
@@ -92,16 +92,18 @@ def train(model, images, captions):
     captions = captions[:-(len(captions) % model.batch_size)]
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
-    print(caption_input.shape)
     loss_graph = []
-    for i in range(0, len(images)//model.batch_size): 
+
+    
+    for i in range(0, len(images)//model.batch_size - 1): 
+    
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
             predictions = model.call(imgs, caps_input, None)
             padding_mask = np.where(caps_label == 0, 0, 1)
-            loss = model.loss_function(predictions, caps_label, padding_mask)
+            loss = model.loss(predictions[0], caps_label, padding_mask)
             loss_graph.append(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -177,7 +179,7 @@ def main():
     images = data[1]
     model = Model(len(vocab_dict))
     loss_graph = train(model, images, training_captions)
-    vizualize_loss(loss_graph)
+    # vizualize_loss(loss_graph)
 
 
 
