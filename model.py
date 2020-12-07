@@ -20,24 +20,24 @@ class Model(tf.keras.Model):
         :param vocab_size: The number of unique characters in the data
         """
         self.caption_length = 152
-        self.batch_size = 100
+        self.batch_size = 10
         self.vocab_size = vocab_size
-        self.embedding_size =256
+        self.embedding_size = 30
+        self.encoder_size = 128
         self.learning_rate = 0.01
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
 
         ##caption model
         self.embedding = tf.Variable(tf.random.normal([self.vocab_size, self.embedding_size], stddev=.1))
-        self.encoder = LSTM(self.embedding_size, return_sequences=True, return_state=True)
+        self.encoder = LSTM(self.encoder_size, return_sequences=True, return_state=True)
         self.dropout_caps = Dropout(0.5)
         
-        ##images model
+        ##images models
         self.dropout_imgs = Dropout(0.5)
-        self.dense_imgs = Dense(self.embedding_size)
+        self.dense_imgs = Dense(self.encoder_size)
 
         ##merge
-        self.add = Add()
-        self.dense = Dense(self.embedding_size, activation='relu')
+        self.dense = Dense(self.encoder_size, activation='relu')
         self.predict = Dense(self.vocab_size, activation='softmax')
         self.printed = False
         
@@ -56,13 +56,15 @@ class Model(tf.keras.Model):
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
         encode = self.dropout_caps(embeds)
         whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
+        
         ##images
         images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
-
+      
         ##merge
-        combined = self.add([whole_seq_output, images])
+        combined = whole_seq_output + tf.expand_dims(images, 1)
         combined = self.dense(combined)
+        print(tf.reduce_sum(combined))
         output = self.predict(combined)
         
         return output, (final_memory_state,final_carry_state)
@@ -76,7 +78,7 @@ class Model(tf.keras.Model):
         """
         loss = tf.keras.losses.sparse_categorical_crossentropy(labels, probs)
         loss = tf.reduce_sum(loss * mask)
-        print(loss)
+        print(f'Loss: {loss}')
         return loss
 
 def train(model, images, captions):
@@ -182,15 +184,13 @@ def main():
     data = load_data("data/captions.json","data/features.npy")
     training_captions, vocab_dict = tokenize(data[0])
     images = data[1]
+    print(np.max(training_captions))
     model = Model(len(vocab_dict))
-    loss_graph = train(model, images, training_captions)
-<<<<<<< HEAD
-    vizualize_loss(loss_graph)
-=======
-    generate_caption(vocab_dict, np.array([images[0]]), model)
-    vizualize_loss(loss_graph)
+    for i in range(50):
+        loss_graph = train(model, images, training_captions)
+        generate_caption(vocab_dict, np.array([images[0]]), model)
+        vizualize_loss(loss_graph)
 
->>>>>>> daf9b5a5a881b3712cb8745a7956bb32b4b1c5e1
 
 
 
