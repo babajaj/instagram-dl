@@ -46,11 +46,11 @@ def tokenize(captions):
     return training_data, vocab_dict
     
 
-data = load_data("data/captions.json","data/images.npy")
-print('loaded')
-captions = tokenize(data[0])
-reverse_vocab = {idx: char for char, idx in captions[1].items()}
-print(len(captions[1]))
+# data = load_data("data/captions.json","data/images.npy")
+# print('loaded')
+# captions = tokenize(data[0])
+# reverse_vocab = {idx: char for char, idx in captions[1].items()}
+# print(len(captions[1]))
 # print(''.join([reverse_vocab[x] for x in captions[0]]))
 # cap = ["folklore will have 16 songs on the standard edition, but the physical deluxe editions will include a bonus track called \u201cthe lakes.\u201d Because this is my 8th studio album, I made 8 deluxe CD editions and 8 deluxe vinyl editions that are available for one week\ud83d\ude04 Each deluxe edition has unique covers, photos, and artwork. Available exclusively at taylorswift.com ","goodbye!"]
 # out = tokenize(cap)

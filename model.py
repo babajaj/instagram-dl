@@ -44,7 +44,7 @@ class Model(tf.keras.Model):
 
 
 
-    def call(self, images, captions, initial_state):
+    def call(self, images, captions, initial_state, i):
         """
         :param inputs: character ids of shape (batch_size, window_size)
         :return: the batch element probabilities as a tensor, a final_state (Note 1: If you use an LSTM, the final_state will be the last two RNN outputs, 
@@ -62,9 +62,8 @@ class Model(tf.keras.Model):
         images = self.dense_imgs(images)
       
         ##merge
-        combined = whole_seq_output + tf.expand_dims(images, 1)
+        combined = whole_seq_output + (.001 * i * tf.expand_dims(images, 1))
         combined = self.dense(combined)
-        print(tf.reduce_sum(combined))
         output = self.predict(combined)
         
         return output, (final_memory_state,final_carry_state)
@@ -81,7 +80,7 @@ class Model(tf.keras.Model):
         print(f'Loss: {loss}')
         return loss
 
-def train(model, images, captions):
+def train(model, images, captions, epochs):
     """
     Runs through one epoch - all training examples.
 
@@ -105,7 +104,7 @@ def train(model, images, captions):
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
-            predictions = model.call(imgs, caps_input, None)
+            predictions = model.call(imgs, caps_input, None,epochs)
             padding_mask = np.where(caps_label == 0, 0, 1)
             loss = model.loss(predictions[0], caps_label, padding_mask)
             loss_graph.append(loss)
@@ -139,7 +138,7 @@ def accuracy_function(self, prbs, labels, mask):
     accuracy = tf.reduce_mean(tf.boolean_mask(tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32),mask))
     return accuracy
 
-def generate_caption(vocab, image, caption, model,  sample_n=10):
+def generate_caption(vocab, image, model, i, sample_n=10):
     """
     Takes a model, vocab, selects from the most likely next word from the model's distribution
 
@@ -155,13 +154,13 @@ def generate_caption(vocab, image, caption, model,  sample_n=10):
     previous_state = None
 
     first_char = 1
-    next_input = [caption]
+    next_input = [[first_char]]
     text = ""
     out_index = 0
     i = 0
     while out_index != 2 and i < 50:
         i +=1 
-        logits, previous_state = model.call(image, next_input, previous_state)
+        logits, previous_state = model.call(image, next_input, previous_state, i)
         # logits = np.array(logits[0,0,:])
         # top_n = np.argsort(logits)[-sample_n:]
         # n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
@@ -186,9 +185,8 @@ def main():
     print(np.max(training_captions))
     model = Model(len(vocab_dict))
     for i in range(1):
-        loss_graph = train(model, images[:500], training_captions[:500*152])
-        generate_caption(vocab_dict, np.array([images[0]]), training_captions[:10], model)
-        generate_caption(vocab_dict, np.array([images[0]]), training_captions[:20], model)
+        loss_graph = train(model, images, training_captions,i)
+        generate_caption(vocab_dict, np.array([images[0]]), model,i)
         vizualize_loss(loss_graph)
 
 
