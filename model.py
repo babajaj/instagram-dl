@@ -199,8 +199,8 @@ def main():
         print(i)
         train(model, images, training_captions,i)
     vizualize_loss(np.array(model.loss_graph).flatten())
-    print(data[0][45])
-    generate_caption(vocab_dict, np.array([images[45]]), model,30)
+    print(data[0][2])
+    generate_caption(vocab_dict, np.array([images[2]]), model,30)
 
 
 
