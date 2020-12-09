@@ -74,7 +74,10 @@ def pickle(names, images, captions):
     print('captions done')
 
 
+
 names, images, captions = build_data(profiles2)
+
+print(len(names), len(images), len(captions))
 pickle(names, images, captions)
 
 print("done with making a pickle")

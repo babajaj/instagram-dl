@@ -11,6 +11,7 @@ def tokenize(captions):
     :param captions: Captions of all the images
     :return: Tuple of train (1-d list or array with each character from captions in id form), vocabulary (Dict containg word->index mapping)
     """
+    print(len(captions))
     vocab_dict = {'P': 0, 'S': 1, 'T': 2, 'X': 3}
     freq = {}
     x = 4
@@ -43,7 +44,7 @@ def tokenize(captions):
         while padding < 150:
             training_data.append(0)
             padding += 1
-    return training_data, vocab_dict
+    return np.array(training_data), vocab_dict
     
 
 # data = load_data("data/captions.json","data/images.npy")
@@ -71,4 +72,4 @@ def pre_image(images):
     return features
 
 
-
+data, dicti = tokenize("data/captions.json")

@@ -8,5 +8,9 @@ def load_data(caption_file, images_file):
     with open(images_file, 'rb') as imgs:
         images = np.load(imgs, allow_pickle=True)
     print('loaded images')
+
     return captions, images
 
+c, i = load_data("data/captions.json","data/images.npy")
+
+print(len(c), len(i))

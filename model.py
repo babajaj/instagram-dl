@@ -40,6 +40,7 @@ class Model(tf.keras.Model):
         self.dense = Dense(self.encoder_size, activation='relu')
         self.predict = Dense(self.vocab_size, activation='softmax')
         self.printed = False
+        self.loss_graph = []
         
 
 
@@ -54,15 +55,15 @@ class Model(tf.keras.Model):
         ##caps
         captions = tf.convert_to_tensor(captions)
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
-        # encode = self.dropout_caps(embeds)
-        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(embeds, initial_state=initial_state)
+        encode = self.dropout_caps(embeds)
+        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
         
         ##images
-        # images = self.dropout_imgs(images)
+        images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
       
         ##merge
-        combined = whole_seq_output + (.001 * i * tf.expand_dims(images, 1))
+        combined = whole_seq_output + (.0000002*i* tf.expand_dims(images, 1))
         combined = self.dense(combined)
         output = self.predict(combined)
         
@@ -77,7 +78,7 @@ class Model(tf.keras.Model):
         """
         loss = tf.keras.losses.sparse_categorical_crossentropy(labels, probs)
         loss = tf.reduce_sum(loss * mask)
-        print(f'Loss: {loss}')
+        self.loss_graph.append(loss)
         return loss
 
 def train(model, images, captions, epochs):
@@ -89,17 +90,22 @@ def train(model, images, captions, epochs):
     :param train_labels: train labels (all labels for training) of shape (num_labels,)
     :return: None
     """
-   
+    # print(images.shape)
+
+    # print(len(captions) / model.caption_length)
     images = images[:-(len(images) % model.batch_size)]
+
     captions = np.reshape(captions, (-1, model.caption_length))
     captions = captions[:-(len(captions) % model.batch_size)]
+    # shuffler = np.random.permutation(len(images))
+    # images = images[shuffler]
+    # captions = captions[shuffler]
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
     loss_graph = []
-
     
-    for i in range(0, len(images)//model.batch_size-1): 
-        print(i)
+    
+    for i in range(0, len(images)//model.batch_size-5): 
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
@@ -180,15 +186,16 @@ def vizualize_loss(loss_arr):
 
 def main():
     data = load_data("data/captions.json","data/features.npy")
+    print(data[1].shape)
+    print(len(data[0]))
     training_captions, vocab_dict = tokenize(data[0])
     images = data[1]
-    print(np.max(training_captions))
     model = Model(len(vocab_dict))
-    for i in range(1):
-        loss_graph = train(model, images, training_captions,i)
-        generate_caption(vocab_dict, np.array([images[0]]), model,i)
-        vizualize_loss(loss_graph)
-
+    for i in range(30):
+   
+        train(model, images, training_captions,i)
+    vizualize_loss(np.array(model.loss_graph).flatten())
+    generate_caption(vocab_dict, np.array([images[0]]), model,20)
 
 
 
