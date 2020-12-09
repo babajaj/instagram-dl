@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import nltk
 from preprocess import tokenize, pre_image
@@ -9,6 +10,8 @@ from tensorflow.keras.optimizers import Adam
 from nltk.translate.bleu_score import sentence_bleu
 import matplotlib.pyplot as plt
 
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
 
 
 class Model(tf.keras.Model):
@@ -22,7 +25,7 @@ class Model(tf.keras.Model):
         self.caption_length = 152
         self.batch_size = 10
         self.vocab_size = vocab_size
-        self.embedding_size = 30
+        self.embedding_size = 64
         self.encoder_size = 128
         self.learning_rate = 0.01
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
@@ -63,7 +66,7 @@ class Model(tf.keras.Model):
         images = self.dense_imgs(images)
       
         ##merge
-        combined = whole_seq_output + (.0000002*i* tf.expand_dims(images, 1))
+        combined = whole_seq_output + (.0002*i* tf.expand_dims(images, 1))
         combined = self.dense(combined)
         output = self.predict(combined)
         
@@ -97,9 +100,10 @@ def train(model, images, captions, epochs):
 
     captions = np.reshape(captions, (-1, model.caption_length))
     captions = captions[:-(len(captions) % model.batch_size)]
-    # shuffler = np.random.permutation(len(images))
-    # images = images[shuffler]
-    # captions = captions[shuffler]
+    shuffler = np.random.permutation(len(images))
+    images = images[shuffler]
+    captions = captions[shuffler]
+
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
     loss_graph = []
@@ -164,7 +168,7 @@ def generate_caption(vocab, image, model, i, sample_n=10):
     text = ""
     out_index = 0
     i = 0
-    while out_index != 2 and i < 50:
+    while out_index != 2 and i < 100:
         i +=1 
         logits, previous_state = model.call(image, next_input, previous_state, i)
         # logits = np.array(logits[0,0,:])
@@ -192,10 +196,11 @@ def main():
     images = data[1]
     model = Model(len(vocab_dict))
     for i in range(30):
-   
+        print(i)
         train(model, images, training_captions,i)
     vizualize_loss(np.array(model.loss_graph).flatten())
-    generate_caption(vocab_dict, np.array([images[0]]), model,20)
+    print(data[0][45])
+    generate_caption(vocab_dict, np.array([images[45]]), model,30)
 
 
 

@@ -11,6 +11,6 @@ def load_data(caption_file, images_file):
 
     return captions, images
 
-c, i = load_data("data/captions.json","data/images.npy")
+c, i = load_data("data/captions.json","data/features.npy")
 
-print(len(c), len(i))
+# print(len(c), len(i))
