@@ -1,12 +1,12 @@
 import tensorflow as tf
 import numpy as np
-import nltk
+# import nltk
 from preprocess import tokenize, pre_image
 from unscraper import load_data
 from tensorflow.keras.layers import (LSTM, Embedding, Input, Dense, Dropout, Add)
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from nltk.translate.bleu_score import sentence_bleu
+# from nltk.translate.bleu_score import sentence_bleu
 import matplotlib.pyplot as plt
 
 

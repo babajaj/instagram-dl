@@ -5,6 +5,7 @@ from tensorflow.keras.preprocessing.image import img_to_array, load_img
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
 from unscraper import load_data
 import numpy as np
+from PIL import Image
 
 def tokenize(captions):
     """
@@ -53,9 +54,12 @@ def pre_image(images):
     cnn_model = Model(inputs=cnn_model.inputs, outputs=cnn_model.layers[-2].output)
     x = preprocess_input(images)
     features = cnn_model.predict(x)
-    with open("data/features.npy", "wb") as feats:
+    with open("data/fun.npy", "wb") as feats:
         np.save(feats, features, allow_pickle=True)
     return features
 
+
+image = Image.open('/data/fun_pic.png')
+pre_image(image)
 
 
