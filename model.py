@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 # import nltk
 from preprocess import tokenize, pre_image
@@ -9,6 +10,8 @@ from tensorflow.keras.optimizers import Adam
 # from nltk.translate.bleu_score import sentence_bleu
 import matplotlib.pyplot as plt
 
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
 
 
 class Model(tf.keras.Model):
@@ -20,47 +23,50 @@ class Model(tf.keras.Model):
         :param vocab_size: The number of unique characters in the data
         """
         self.caption_length = 152
-        self.batch_size = 100
+        self.batch_size = 10
         self.vocab_size = vocab_size
-        self.embedding_size = 256
+        self.embedding_size = 64
+        self.encoder_size = 128
         self.learning_rate = 0.01
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
 
         ##caption model
         self.embedding = tf.Variable(tf.random.normal([self.vocab_size, self.embedding_size], stddev=.1))
-        self.encoder = LSTM(self.embedding_size, return_sequences=True, return_state=True)
+        self.encoder = LSTM(self.encoder_size, return_sequences=True, return_state=True)
         self.dropout_caps = Dropout(0.5)
         
-        ##images model
+        ##images models
         self.dropout_imgs = Dropout(0.5)
-        self.dense_imgs = Dense(self.embedding_size)
+        self.dense_imgs = Dense(self.encoder_size)
 
         ##merge
-        self.add = Add()
-        self.dense = Dense(self.embedding_size, activation='relu')
+        self.dense = Dense(self.encoder_size, activation='relu')
         self.predict = Dense(self.vocab_size, activation='softmax')
+        self.printed = False
+        self.loss_graph = []
         
 
 
 
-    def call(self, images, captions, initial_state):
+    def call(self, images, captions, initial_state, i):
         """
         :param inputs: character ids of shape (batch_size, window_size)
         :return: the batch element probabilities as a tensor, a final_state (Note 1: If you use an LSTM, the final_state will be the last two RNN outputs, 
         Note 2: We only need to use the initial state during generation)
         using LSTM and only the probabilites as a tensor and a final_state as a tensor when using GRU 
         """
-        ##caps        
+        ##caps
+        captions = tf.convert_to_tensor(captions)
         embeds = tf.nn.embedding_lookup(self.embedding, captions)
         encode = self.dropout_caps(embeds)
-        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode)
-
+        whole_seq_output, final_memory_state, final_carry_state  = self.encoder(encode, initial_state=initial_state)
+        
         ##images
         images = self.dropout_imgs(images)
         images = self.dense_imgs(images)
-
+      
         ##merge
-        combined = self.add([whole_seq_output, images])
+        combined = whole_seq_output + (.0002*i* tf.expand_dims(images, 1))
         combined = self.dense(combined)
         output = self.predict(combined)
         
@@ -73,11 +79,12 @@ class Model(tf.keras.Model):
         :param labels: matrix of shape (batch_size, window_size) containing the labels
         :return: the loss of the model as a tensor of size 1
         """
-        loss = tf.keras.losses.sparse_categorical_crossentropy(labels,probs[0])
+        loss = tf.keras.losses.sparse_categorical_crossentropy(labels, probs)
         loss = tf.reduce_sum(loss * mask)
+        self.loss_graph.append(loss)
         return loss
 
-def train(model, images, captions):
+def train(model, images, captions, epochs):
     """
     Runs through one epoch - all training examples.
 
@@ -86,22 +93,30 @@ def train(model, images, captions):
     :param train_labels: train labels (all labels for training) of shape (num_labels,)
     :return: None
     """
-   
+    # print(images.shape)
+
+    # print(len(captions) / model.caption_length)
     images = images[:-(len(images) % model.batch_size)]
 
     captions = np.reshape(captions, (-1, model.caption_length))
-    captions = captions[:-(len(images) % model.batch_size)]
+    captions = captions[:-(len(captions) % model.batch_size)]
+    shuffler = np.random.permutation(len(images))
+    images = images[shuffler]
+    captions = captions[shuffler]
+
     caption_input = captions[:, :-1]
     caption_label = captions[:, 1:]
     loss_graph = []
-    for i in range(0, len(images)//model.batch_size): 
+    
+    
+    for i in range(0, len(images)//model.batch_size-5): 
         imgs = images[i*model.batch_size:(i+1)* model.batch_size]
         caps_input = caption_input[i*model.batch_size:(i+1)* model.batch_size]
         caps_label = caption_label[i*model.batch_size:(i+1)* model.batch_size]
         with tf.GradientTape() as tape:
-            predictions = model.call(imgs, caps_input, None)
+            predictions = model.call(imgs, caps_input, None,epochs)
             padding_mask = np.where(caps_label == 0, 0, 1)
-            loss = model.loss_function(predictions, caps_label, padding_mask)
+            loss = model.loss(predictions[0], caps_label, padding_mask)
             loss_graph.append(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -133,7 +148,7 @@ def accuracy_function(self, prbs, labels, mask):
     accuracy = tf.reduce_mean(tf.boolean_mask(tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32),mask))
     return accuracy
 
-def generate_caption(vocab, image, model, sample_n=10):
+def generate_caption(vocab, image, model, i, sample_n=10):
     """
     Takes a model, vocab, selects from the most likely next word from the model's distribution
 
@@ -148,19 +163,21 @@ def generate_caption(vocab, image, model, sample_n=10):
     reverse_vocab = {idx: char for char, idx in vocab.items()}
     previous_state = None
 
-    first_char = -1
+    first_char = 1
     next_input = [[first_char]]
     text = ""
     out_index = 0
-    while out_index != -2:
-        logits, previous_state = model.call(image, next_input, previous_state)
+    i = 0
+    while out_index != 2 and i < 100:
+        i +=1 
+        logits, previous_state = model.call(image, next_input, previous_state, i)
         # logits = np.array(logits[0,0,:])
         # top_n = np.argsort(logits)[-sample_n:]
         # n_logits = np.exp(logits[top_n])/np.exp(logits[top_n]).sum()
-        out_index = np.argmax(logits)
-        if out_index != -2:
-            text.append(reverse_vocab[out_index])
-        next_input = [[out_index]]
+        out_index = np.argmax(logits[0, logits.shape[1] - 1, :])
+        if out_index != 2:
+            text += (reverse_vocab[out_index])
+        next_input[0].append(out_index)
     print(text)
 
 
@@ -173,11 +190,17 @@ def vizualize_loss(loss_arr):
 
 def main():
     data = load_data("data/captions.json","data/features.npy")
+    print(data[1].shape)
+    print(len(data[0]))
     training_captions, vocab_dict = tokenize(data[0])
     images = data[1]
     model = Model(len(vocab_dict))
-    loss_graph = train(model, images, training_captions)
-    vizualize_loss(loss_graph)
+    for i in range(30):
+        print(i)
+        train(model, images, training_captions,i)
+    vizualize_loss(np.array(model.loss_graph).flatten())
+    print(data[0][2])
+    generate_caption(vocab_dict, np.array([images[2]]), model,30)
 
 
 
