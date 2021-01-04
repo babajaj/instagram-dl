@@ -1,6 +1,8 @@
 
 By: Eyal Levin and Tali Bers
 
+https://www.youtube.com/watch?v=X5iJtErVAR0&feature=youtu.be
+
 ## Introduction:
 
 Despite the popularity of Instagram, instagram captions are confusing and often have nothing to do with the photo. Some captions “make sense” for the photo, and others don’t, and for humans this distinction can be pretty obvious in many cases. so we set out on a journey to decode instagram captions. In this project, we attempted to train a caption generator on image/caption pairs, and generate captions for our favorite photos. The goal is not to output the “correct” caption, but one that could work for the photo. 
